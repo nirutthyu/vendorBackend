@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const { MongoClient } = require("mongodb"); // MISSING in your code snippet
+
 
 dotenv.config();
 
