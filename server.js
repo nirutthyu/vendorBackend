@@ -14,6 +14,35 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const client = new MongoClient(process.env.MONGO_URI);
+let usersCollection;
+
+async function connectDB() {
+    await client.connect();
+    const db = client.db("farmUsers");
+    usersCollection = db.collection("users");
+    traceCollection=db.collection("traceability")
+}
+connectDB().catch(console.error);
+
+app.get("/api/vendors", async (req, res) => {
+    try {
+        const users = await usersCollection.find({}).toArray();
+        // Map only required details for frontend
+        const vendors = users.map(user => ({
+            _id: user._id,               // include MongoDB id
+            name: user.name,
+            location: user.location,
+            rating: Math.floor(Math.random() * 5) + 1, // example random rating
+            img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRm5zQ8_hzz-tUHMgsK6PqY8KcCrq4wCgMnmQ&s" , // use user's image if exists
+            products: user.products || []  // include products array
+        }));
+        res.json(vendors);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error fetching vendors");
+    }
+});
 // Connect to MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
